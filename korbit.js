@@ -13,7 +13,7 @@ class Korbit {
 
   constructor(clientID, clientSecret, userName, userPassword){
     this.config = {
-      url : 'https://api.korbit.co.kr/',
+      url : 'https://api.korbit-test.com/',
       version : 'v1',
       timeoutMS : 18000
     };
@@ -22,10 +22,6 @@ class Korbit {
     this.clientSecret = clientSecret;
     this.userName = userName;
     this.userPassword = userPassword;
-
-    if(_.isEmpty(this.accessToken)){
-      this.authorize();
-    }
   }
 
   /*
@@ -66,82 +62,82 @@ class Korbit {
 
   /* AUTH METHOD */
   authorize(callback) {
-    return this.requestPrivateAPI('POST', 'oauth2/access_token');
+    return this.requestAuthAPI('/oauth2/access_token', callback);
   }
 
-  refreshToken(callback) {
-    return this.requestPrivateAPI('POST', 'oauth2/access_token');
+  refreshAccessToken(callback) {
+    return this.requestAuthAPI('/oauth2/access_token', callback);
   }
 
   /* USER METHOD */
-  getInfo (callback) {
-    return this.requestPrivateAPI('GET', 'user/info');
+  getUserInfo (callback) {
+    return this.requestPrivateAPI('GET', '/user/info', callback);
   }
 
   bidOrder (params, callback){
-    return this.requestPrivateAPI('POST', 'user/orders/buy', params);
+    return this.requestPrivateAPI('POST', '/user/orders/buy', params, callback);
   }
 
   askOrder (params, callback){
-    return this.requestPrivateAPI('POST', 'user/orders/sell', params);
+    return this.requestPrivateAPI('POST', '/user/orders/sell', params, callback);
   }
 
   cancelOrder(params, callback){
-    return this.requestPrivateAPI('POST', 'user/orders/cancel', params);
+    return this.requestPrivateAPI('POST', '/user/orders/cancel', params, callback);
   }
 
   listOrders(callback){
-    return this.requestPrivateAPI('GET', 'user/orders/open');
+    return this.requestPrivateAPI('GET', '/user/orders/open', callback);
   }
 
   transactionHistory(params, callback){
-    return this.requestPrivateAPI('GET', 'user/transaction');
+    return this.requestPrivateAPI('GET', '/user/transaction', callback);
   }
 
 
   /* FIAT METHOD */
 
   setVirtualBank(params, callback){
-    return this.requestPrivateAPI('POST', 'user/fiats/address/assign');
+    return this.requestPrivateAPI('POST', '/user/fiats/address/assign', callback);
   }
 
   setBankAccount(params, callback){
-    return this.requestPrivateAPI('POST', 'user/fiats/address/register', params);
+    return this.requestPrivateAPI('POST', '/user/fiats/address/register', params, callback);
   }
 
   requestWithdrawal(params, callback){
-    return this.requestPrivateAPI('POST', 'user/fiats/out', params);
+    return this.requestPrivateAPI('POST', '/user/fiats/out', params, callback);
   }
 
   withdrawalStatus(callback){
-    return this.requestPrivateAPI('GET', 'user/fiats/status');
+    return this.requestPrivateAPI('GET', '/user/fiats/status', callback);
   }
 
   cancelWithdrawal(params, callback){
-    return this.requestPrivateAPI('POST', 'user/fiats/out/cancel', params);
+    return this.requestPrivateAPI('POST', '/user/fiats/out/cancel', params, callback);
   }
 
 
   /* WALLET METHOD */
 
   getWalletStatus(callback){
-    return this.requestPrivateAPI('POST', 'user/wallet');
+    return this.requestPrivateAPI('GET', '/user/wallet', callback);
   }
 
   assignWalletAddr(params, callback){
-    return this.requestPrivateAPI('POST', 'user/conins/address/assign', params);
+    return this.requestPrivateAPI('POST', '/user/conins/address/assign', params, callback);
   }
 
   requestBTCWithdrawal(params, callback){
-    return this.requestPrivateAPI('POST', 'user/coins/out', params);
+    return this.requestPrivateAPI('POST', '/user/coins/out', params, callback);
   }
 
   btcWithdrawalStatus(callback){
-    return this.requestPrivateAPI('GET', 'user/coins/status');
+    return this.requestPrivateAPI('GET', '/user/coins/status', callback);
   }
 
   cancelBTCWithdrawal(params, callback){
-    return this.requestPrivateAPI('POST', 'user/coins/out/cancel');
+    return this.requestPrivateAPI('POST', '/user/coins/out/cancel', callback);
   }
 
   /*
@@ -163,27 +159,85 @@ class Korbit {
   }
 
   requestPublicAPI (path, params, callback){
-    if(typeof callback === undefined){
+    if(callback === undefined){
       callback = params;
     }
+
     needle.get(this.config.url + this.config.version + path, params, function(err, response){
-      if(err)
-        console.log(err);
-      else
-        console.log(response.body);
+      if(!err && response.statusCode == 200){
+        return callback(null, response.body);
+      } else {
+        return callback(new Error(response.headers.warning), null);
+      }
     });
   }
 
   requestPrivateAPI (method, path, params, callback){
-    var headers = {
-      'Accept' : 'application/json',
-      'Authorization' : 'Bearer ' + config.apiKey
+    if(callback === undefined){
+      callback = params;
     }
-    if(_.isEmpty(this.config.clientID) || _.isEmpty(this.config.clientSecret))
-      return console.log("Missing Parameters");
 
-    if(_.isEmpty(this.config.accessToken)){
-      //TODO
+    if(_.isEmpty(this.clientID) || _.isEmpty(this.clientSecret)){
+      return callback(new Error("Credentials are not set."), null);
+    }
+
+    var options = {
+      headers : {
+        'Accept' : 'application/json',
+        'Authorization' : _.isEmpty(this.accessToken) ? null : 'Bearer ' + this.accessToken
+      }
+    }
+
+    if(method == 'GET'){
+      needle.get(this.config.url + this.config.version + path + '?nonce=' + this.generateNonce(), options, function(err, response){
+        if(!err && response.statusCode == 200 && response.status == 'success'){
+          return callback(null, response.body);
+        } else if(response.statusCode == 200 && response.status != 'success') {
+          return callback(new Error(response.body.status), null);
+        } else {
+          return callback(new Error(response.headers.warning), null);
+        }
+      });
+    } else {
+      params.nonce = this.generateNonce();
+      needle.post(this.config.url + this.config.version + path, params, function(err, response){
+        if(!err && response.statusCode == 200 && response.status == 'success'){
+          return callback(null, response.body);
+        } else if(response.statusCode == 200 && response.status != 'success') {
+          return callback(new Error(response.body.status), null);
+        } else {
+          return callback(new Error(response.headers.warning), null);
+        }
+      });
+    }
+  }
+
+  requestAuthAPI (path, callback){
+    var self = this;
+    if(_.isEmpty(this.clientID) || _.isEmpty(this.clientSecret)){
+      return callback(new Error("Credentials are not set."), null);
+    } else {
+      var body = {
+        client_id : this.clientID,
+        client_secret : this.clientSecret,
+        username : this.userName,
+        password : this.userPassword,
+        grant_type : _.isEmpty(this.refreshToken) ? 'password' : 'refresh_token'
+      }
+
+      if(!_.isEmpty(this.refreshToken))
+        body.refresh_token = this.refreshToken;
+
+      needle.post(this.config.url + this.config.version + path, body, function(err, response){
+        if(!err && response.statusCode == 200){
+          self.refreshToken = response.body['refresh_token'];
+          self.accessToken = response.body['access_token'];
+          self.expires = new Date().getTime() + response.body['expires_in'];
+          return callback(null, response.body);
+        } else {
+          return callback(new Error("Failed to authorize. " + response.headers.warning), null);
+        }
+      });
     }
   }
 }
