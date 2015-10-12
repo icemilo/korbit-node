@@ -5,16 +5,11 @@
   "private": false,
   "author": "KOO JAE SEUNG",
   "homepage": "https://www.korbit.co.kr",
-  "bugs": { "url": "" },
-  "scripts": { "start": "nodemon app.js" },
   "dependencies": {
     "lodash": "1.x",
     "needle": "0.10.x"
-  },
-  "devDependencies": {
-    "nodemon": "*"
-  },
-  "keywords": [],
+  }
+  "keywords": ['korbit', 'korbit-sdk'],
   "repository": "",
   "licenses": [{
     "type": "MIT",

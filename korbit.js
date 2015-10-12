@@ -5,8 +5,10 @@ var _ = require('lodash');
 
 /**
   * Korbit API wrapper
-  * @param {String} apiKey
-  * @param {String} secretKey
+  * @param {String} clientID
+  * @param {String} clientSecret
+  * @param {String} userName
+  * @param {String} userPassword
 **/
 
 class Korbit {
