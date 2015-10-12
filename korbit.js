@@ -158,6 +158,10 @@ class Korbit {
     return now + noncePadding + this.nonceIncr;
   }
 
+  /*
+   * Request method for public API
+   */
+
   requestPublicAPI (path, params, callback){
     if(callback === undefined){
       callback = params;
@@ -171,6 +175,10 @@ class Korbit {
       }
     });
   }
+
+  /*
+   * Request method for private API (with access token)
+   */
 
   requestPrivateAPI (method, path, params, callback){
     if(callback === undefined){
@@ -211,6 +219,10 @@ class Korbit {
       });
     }
   }
+
+  /*
+   * Request method for authentication APIs
+   */
 
   requestAuthAPI (path, callback){
     var self = this;
