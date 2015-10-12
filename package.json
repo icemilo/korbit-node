@@ -1,6 +1,6 @@
 {
   "name": "Korbit-SDK-Node.js",
-  "description": "",
+  "description": "Node.js SDK for Korbit API",
   "version": "0.0.1",
   "private": false,
   "author": "KOO JAE SEUNG",

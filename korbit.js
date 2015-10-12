@@ -15,8 +15,9 @@ class Korbit {
     if(_.isEmpty(clientID) || _.isEmpty(clientSecret) || _.isEmpty(userName) || _.isEmpty(userPassword)){
       throw new Error("Missing Parameters");
     }
+
     this.config = {
-      url : 'https://api.korbit-test.com/',
+      url : process.env.NODE_ENV != "production" ? 'https://api.korbit-test.com/' : 'https://api.korbit.co.kr/',
       version : 'v1',
       timeoutMS : 18000
     };
