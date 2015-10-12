@@ -12,6 +12,9 @@ var _ = require('lodash');
 class Korbit {
 
   constructor(clientID, clientSecret, userName, userPassword){
+    if(_.isEmpty(clientID) || _.isEmpty(clientSecret) || _.isEmpty(userName) || _.isEmpty(userPassword)){
+      throw new Error("Missing Parameters");
+    }
     this.config = {
       url : 'https://api.korbit-test.com/',
       version : 'v1',
@@ -198,10 +201,8 @@ class Korbit {
 
     if(method == 'GET'){
       needle.get(this.config.url + this.config.version + path + '?nonce=' + this.generateNonce(), options, function(err, response){
-        if(!err && response.statusCode == 200 && response.status == 'success'){
+        if(!err && response.statusCode == 200){
           return callback(null, response.body);
-        } else if(response.statusCode == 200 && response.status != 'success') {
-          return callback(new Error(response.body.status), null);
         } else {
           return callback(new Error(response.headers.warning), null);
         }
