@@ -8,8 +8,8 @@
   "dependencies": {
     "lodash": "1.x",
     "needle": "0.10.x"
-  }
-  "keywords": ['korbit', 'korbit-sdk'],
+  },
+  "keywords": ["korbit", "korbit-sdk"],
   "repository": "",
   "licenses": [{
     "type": "MIT",
