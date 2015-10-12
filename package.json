@@ -1,0 +1,23 @@
+{
+  "name": "Korbit-SDK-Node.js",
+  "description": "",
+  "version": "0.0.1",
+  "private": false,
+  "author": "KOO JAE SEUNG",
+  "homepage": "https://www.korbit.co.kr",
+  "bugs": { "url": "" },
+  "scripts": { "start": "nodemon app.js" },
+  "dependencies": {
+    "lodash": "1.x",
+    "needle": "0.10.x"
+  },
+  "devDependencies": {
+    "nodemon": "*"
+  },
+  "keywords": [],
+  "repository": "",
+  "licenses": [{
+    "type": "MIT",
+    "url": "http://opensource.org/licenses/MIT"
+  }]
+}
