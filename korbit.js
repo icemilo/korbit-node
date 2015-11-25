@@ -151,17 +151,7 @@ class Korbit {
    */
 
   generateNonce(){
-    var now = new Date().getTime();
-
-    if(now !== this.last)
-      this.nonceIncr = -1;
-
-    this.last = now;
-    this.nonceIncr++;
-
-    var noncePadding = this.nonceIncr < 10 ? '000' : this.nonceIncr < 100 ? '00' : this.nonceIncr < 1000 ? '0' : '';
-
-    return now + noncePadding + this.nonceIncr;
+    return new Date().getTime();
   }
 
   /*
@@ -200,7 +190,7 @@ class Korbit {
         'Accept' : 'application/json',
         'Authorization' : _.isEmpty(this.accessToken) ? null : 'Bearer ' + this.accessToken
       }
-    }
+    };
 
     if(method == 'GET'){
       needle.get(this.config.url + this.config.version + path + '?nonce=' + this.generateNonce(), options, function(err, response){
@@ -239,7 +229,7 @@ class Korbit {
         username : this.userName,
         password : this.userPassword,
         grant_type : _.isEmpty(this.refreshToken) ? 'password' : 'refresh_token'
-      }
+      };
 
       if(!_.isEmpty(this.refreshToken))
         body.refresh_token = this.refreshToken;
